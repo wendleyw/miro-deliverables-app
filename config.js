@@ -12,7 +12,7 @@ class AppConfig {
             // Miro Configuration
             miro: {
                 appId: this.getEnvVar('MIRO_APP_ID', '3458764598765432109'),
-                accessToken: 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_BH1OjqHpVAomwhAdCt14quaaHGsmelhore',
+                accessToken: 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_g6COHpVOi573okYWzKGcOj3GeSI',
                 region: 'eu01',
                 clientId: this.getEnvVar('MIRO_CLIENT_ID', ''),
                 clientSecret: this.getEnvVar('MIRO_CLIENT_SECRET', '')
@@ -119,15 +119,39 @@ class AppConfig {
     }
     
     getSupabaseClient() {
-        if (typeof createClient === 'undefined') {
-            console.error('Supabase client not loaded. Include Supabase JS library.');
+        // Check if Supabase is loaded
+        if (typeof window === 'undefined') {
+            console.warn('Window object not available');
             return null;
         }
         
-        return createClient(
-            this.get('supabase.url'),
-            this.get('supabase.anonKey')
-        );
+        // Check for Supabase in different possible locations
+        let createClient = null;
+        if (window.supabase && window.supabase.createClient) {
+            createClient = window.supabase.createClient;
+        } else if (typeof window.createClient === 'function') {
+            createClient = window.createClient;
+        } else if (window.Supabase && window.Supabase.createClient) {
+            createClient = window.Supabase.createClient;
+        }
+        
+        if (!createClient) {
+            console.warn('Supabase client not loaded. Analytics will be disabled.');
+            console.warn('Make sure Supabase JS library is loaded before config.js');
+            return null;
+        }
+        
+        try {
+            const client = createClient(
+                this.get('supabase.url'),
+                this.get('supabase.anonKey')
+            );
+            console.log('✅ Supabase client created successfully');
+            return client;
+        } catch (error) {
+            console.error('❌ Failed to create Supabase client:', error);
+            return null;
+        }
     }
 }
 

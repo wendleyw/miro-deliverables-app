@@ -44,6 +44,7 @@ class CEODashboard {
     async loadDashboardData() {
         try {
             if (!this.supabase || !this.boardId) {
+                console.log('📊 Using mock data - Supabase or Board ID not available');
                 this.loadMockData();
                 return;
             }

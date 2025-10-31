@@ -2,7 +2,7 @@
 class EnhancedMiroSDK {
     constructor() {
         this.config = window.AppConfig;
-        this.accessToken = this.config.get('miro.accessToken');
+        this.accessToken = this.config.get('miro.accessToken') || 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_g6COHpVOi573okYWzKGcOj3GeSI';
         this.appId = this.config.get('miro.appId');
         this.region = this.config.get('miro.region') || 'eu01';
         this.boardId = null;
@@ -187,19 +187,25 @@ class EnhancedMiroSDK {
     async trackUserActivity(action, data = {}) {
         try {
             const activity = {
-                boardId: this.boardId,
+                boardId: this.boardId || 'unknown',
                 action: action,
                 data: data,
                 timestamp: new Date().toISOString(),
                 userAgent: navigator.userAgent
             };
             
-            // Send to analytics service
-            await this.sendAnalytics(activity);
+            console.log(`📊 Tracking activity: ${action}`);
             
-            return true;
+            // Send to analytics service
+            const success = await this.sendAnalytics(activity);
+            
+            if (!success) {
+                console.log('📊 Analytics not sent (Supabase unavailable) - this is normal');
+            }
+            
+            return success;
         } catch (error) {
-            console.error('Error tracking user activity:', error);
+            console.warn('Analytics tracking failed (non-critical):', error.message);
             return false;
         }
     }
@@ -436,10 +442,13 @@ Generated: ${new Date().toLocaleString()}`;
     async sendAnalytics(activity) {
         // Send to Supabase analytics table
         const supabase = this.config.getSupabaseClient();
-        if (!supabase) return;
+        if (!supabase) {
+            console.log('📊 Analytics disabled - Supabase not available');
+            return false;
+        }
         
         try {
-            await supabase
+            const { data, error } = await supabase
                 .from('analytics_events')
                 .insert([{
                     board_id: activity.boardId,
@@ -447,8 +456,17 @@ Generated: ${new Date().toLocaleString()}`;
                     event_data: activity.data,
                     created_at: activity.timestamp
                 }]);
+                
+            if (error) {
+                console.warn('Analytics insert error:', error.message);
+                return false;
+            }
+            
+            console.log('📊 Analytics sent successfully');
+            return true;
         } catch (error) {
-            console.error('Error sending analytics:', error);
+            console.warn('Analytics error (non-critical):', error.message);
+            return false;
         }
     }
     
