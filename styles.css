@@ -384,219 +384,207 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Image Calculator Section */
-.image-calculator-section {
+/* CEO Dashboard Section */
+.ceo-dashboard-section {
     margin-top: 24px;
     padding-top: 20px;
     border-top: 1px solid #e1e5e9;
 }
 
-.image-calculator-section h3 {
+.ceo-dashboard-section h3 {
     font-size: 16px;
     font-weight: 600;
     margin-bottom: 16px;
     color: #1a1a1a;
 }
 
-.calculator-container {
+.dashboard-container {
     background: white;
     border: 1px solid #e1e5e9;
     border-radius: 8px;
     padding: 16px;
 }
 
-/* Image Upload Area */
-.image-upload-area {
-    margin-bottom: 16px;
-}
-
-.upload-placeholder {
-    border: 2px dashed #d0d4d9;
-    border-radius: 8px;
-    padding: 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: #f8f9fa;
-}
-
-.upload-placeholder:hover {
-    border-color: #4262ff;
-    background: #f0f4ff;
-}
-
-.upload-icon {
-    font-size: 32px;
-    margin-bottom: 8px;
-}
-
-.upload-placeholder p {
-    margin: 8px 0 4px 0;
-    font-weight: 500;
-    color: #333;
-}
-
-.upload-placeholder small {
-    color: #666;
-    font-size: 12px;
-}
-
-/* Images Grid */
-.images-grid {
+/* Stats Grid */
+.stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 8px;
-    margin-bottom: 16px;
-    max-height: 200px;
-    overflow-y: auto;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-.image-item {
-    position: relative;
-    aspect-ratio: 1;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.image-item:hover {
-    border-color: #4262ff;
-}
-
-.image-item.selected {
-    border-color: #4262ff;
-    box-shadow: 0 0 0 2px rgba(66, 98, 255, 0.2);
-}
-
-.image-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.image-item .remove-btn {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #d32f2f;
-}
-
-.image-item .image-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    font-size: 10px;
-    padding: 2px 4px;
-    text-align: center;
-}
-
-/* Calculator Controls */
-.calculator-controls {
-    margin-bottom: 16px;
-}
-
-.calc-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.calc-row label {
-    font-size: 12px;
-    font-weight: 500;
-    color: #333;
-    min-width: 80px;
-}
-
-.calc-row select,
-.calc-row input {
-    flex: 1;
-    padding: 6px 8px;
-    border: 1px solid #d0d4d9;
-    border-radius: 4px;
-    font-size: 12px;
-}
-
-.unit-label {
-    font-size: 11px;
-    color: #666;
-    min-width: 50px;
-}
-
-#calculate-btn {
-    width: 100%;
-    padding: 10px;
-    font-size: 13px;
-}
-
-#calculate-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
-/* Calculation Results */
-.calculation-results {
+.stat-card {
     background: #f8f9fa;
     border: 1px solid #e1e5e9;
     border-radius: 6px;
     padding: 12px;
+    text-align: center;
 }
 
-.result-item {
+.stat-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4262ff;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Progress Section */
+.progress-section {
+    margin-bottom: 20px;
+}
+
+.progress-section h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e1e5e9;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4262ff, #00c851);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+}
+
+/* Team Performance */
+.team-performance {
+    margin-bottom: 20px;
+}
+
+.team-performance h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.team-member {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 0;
-    border-bottom: 1px solid #e1e5e9;
-    font-size: 13px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 12px;
 }
 
-.result-item:last-child {
+.team-member:last-child {
     border-bottom: none;
 }
 
-.result-label {
+.member-name {
     font-weight: 500;
     color: #333;
 }
 
-.result-value {
-    font-weight: 600;
+.member-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: #666;
+}
+
+.member-efficiency {
     color: #4262ff;
+    font-weight: 500;
 }
 
-.color-swatch {
+/* Recent Activity */
+.recent-activity {
+    margin-bottom: 20px;
+}
+
+.recent-activity h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 11px;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    font-size: 12px;
+    margin-top: 1px;
+}
+
+.activity-text {
+    flex: 1;
+    color: #333;
+    line-height: 1.3;
+}
+
+.activity-time {
+    color: #999;
+    font-size: 10px;
+}
+
+/* CEO Actions */
+.ceo-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.ceo-actions button {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 12px;
+}
+
+/* Status Indicators */
+.status-indicator {
     display: inline-block;
-    width: 16px;
-    height: 16px;
-    border-radius: 3px;
-    border: 1px solid #ddd;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
     margin-right: 6px;
-    vertical-align: middle;
 }
 
-/* Canvas for image analysis */
-.analysis-canvas {
-    max-width: 100%;
-    border: 1px solid #e1e5e9;
-    border-radius: 4px;
-    margin: 8px 0;
+.status-completed {
+    background: #00c851;
+}
+
+.status-in-progress {
+    background: #4262ff;
+}
+
+.status-overdue {
+    background: #ff4444;
+}
+
+.status-revision {
+    background: #ff8800;
 }
 
 /* Responsive */

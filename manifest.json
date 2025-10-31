@@ -8,8 +8,8 @@
   ],
   "startApp": {
     "url": "index.html",
-    "height": 600,
-    "width": 350
+    "height": 650,
+    "width": 380
   },
   "scopes": [
     "boards:read",
@@ -17,5 +17,6 @@
   ],
   "redirectUris": [
     "https://your-domain.com/auth/callback"
-  ]
+  ],
+  "accessToken": "eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_RT8Jc5lYU9GaFreRd1gkAfyXBtAL"
 }

@@ -8,6 +8,7 @@ class DeliverablesDashboard {
         this.supabase = this.config.getSupabaseClient();
         this.projectIntegration = null;
         this.currentProject = null;
+        this.ceoDashboard = null;
         this.isOnline = navigator.onLine;
         this.syncStatus = 'synced';
     }
@@ -56,6 +57,12 @@ class DeliverablesDashboard {
             
             // Load initial data
             await this.loadData();
+            
+            // Initialize CEO Dashboard
+            if (window.CEODashboard) {
+                this.ceoDashboard = new CEODashboard();
+                await this.ceoDashboard.init(this.supabase, this.boardId);
+            }
             
             // Setup real-time subscriptions
             this.setupRealtimeSubscriptions();
