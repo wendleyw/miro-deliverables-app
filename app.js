@@ -9,14 +9,24 @@ class DeliverablesDashboard {
         this.projectIntegration = null;
         this.currentProject = null;
         this.ceoDashboard = null;
+        this.miroSDK = null;
         this.isOnline = navigator.onLine;
         this.syncStatus = 'synced';
     }
 
     async init() {
         try {
-            // Initialize Miro SDK
-            await miro.board.ui.on('ready', this.onBoardReady.bind(this));
+            // Initialize enhanced Miro SDK Manager
+            if (window.MiroSDKManager) {
+                this.miroSDK = new MiroSDKManager();
+                await this.miroSDK.initialize();
+                
+                // Wait for Miro to be ready, then initialize our app
+                await miro.board.ui.on('ready', this.onBoardReady.bind(this));
+            } else {
+                // Fallback to basic Miro SDK
+                await miro.board.ui.on('ready', this.onBoardReady.bind(this));
+            }
             
             // Setup event listeners
             this.setupEventListeners();
@@ -24,7 +34,7 @@ class DeliverablesDashboard {
             // Setup online/offline detection
             this.setupNetworkListeners();
             
-            console.log('Deliverables Dashboard initialized');
+            console.log('Deliverables Dashboard initialized with enhanced Miro SDK');
         } catch (error) {
             console.error('Failed to initialize dashboard:', error);
             this.showError('Failed to initialize app');
@@ -33,11 +43,15 @@ class DeliverablesDashboard {
 
     async onBoardReady() {
         try {
-            // Get board information
-            const boardInfo = await miro.board.getInfo();
-            this.boardId = boardInfo.id;
-            
-            console.log('Board ready:', this.boardId);
+            // Get board information from enhanced SDK or fallback
+            if (this.miroSDK && this.miroSDK.isReady()) {
+                this.boardId = this.miroSDK.getBoardId();
+                console.log('Board ready via enhanced SDK:', this.boardId);
+            } else {
+                const boardInfo = await miro.board.getInfo();
+                this.boardId = boardInfo.id;
+                console.log('Board ready via basic SDK:', this.boardId);
+            }
             
             // Initialize project integration service
             if (this.supabase) {
@@ -46,6 +60,7 @@ class DeliverablesDashboard {
                 // Find or create project for this board
                 this.currentProject = await this.projectIntegration.findProjectByBoardId(this.boardId);
                 if (!this.currentProject) {
+                    const boardInfo = await miro.board.getInfo();
                     this.currentProject = await this.projectIntegration.createProjectForBoard(
                         this.boardId, 
                         boardInfo.title || boardInfo.name
@@ -66,6 +81,13 @@ class DeliverablesDashboard {
             
             // Setup real-time subscriptions
             this.setupRealtimeSubscriptions();
+            
+            // Auto-organize deliverables if we have the enhanced SDK
+            if (this.miroSDK && this.deliverables.length > 0) {
+                setTimeout(() => {
+                    this.miroSDK.organizeDeliverables(this.deliverables);
+                }, 2000);
+            }
             
         } catch (error) {
             console.error('Board ready error:', error);
@@ -312,17 +334,81 @@ class DeliverablesDashboard {
     async highlightBoardElements(deliverableId) {
         try {
             const deliverable = this.deliverables.find(d => d.id === deliverableId);
-            if (!deliverable || !deliverable.miroItemIds) return;
+            if (!deliverable) return;
+
+            // Use enhanced SDK if available
+            if (this.miroSDK) {
+                await this.miroSDK.showNotification(`Viewing: ${deliverable.title}`, 'info');
+            }
 
             // Highlight related elements on the board
-            await miro.board.viewport.zoomTo(deliverable.miroItemIds);
-            
-            // Show notification
-            await miro.board.notifications.showInfo(`Highlighted elements for: ${deliverable.title}`);
+            if (deliverable.miro_item_ids && deliverable.miro_item_ids.length > 0) {
+                await miro.board.viewport.zoomTo(deliverable.miro_item_ids);
+            } else {
+                // Create sticky note if it doesn't exist
+                await this.createStickyNoteForDeliverable(deliverable);
+            }
             
         } catch (error) {
             console.error('Failed to highlight elements:', error);
         }
+    }
+
+    async createStickyNoteForDeliverable(deliverable) {
+        try {
+            let stickyNote;
+            
+            if (this.miroSDK) {
+                // Use enhanced SDK for better formatting
+                stickyNote = await this.miroSDK.createDeliverableSticky(deliverable);
+            } else {
+                // Fallback to basic sticky note creation
+                stickyNote = await miro.board.createStickyNote({
+                    content: `📋 ${deliverable.title}\n\n${deliverable.description || ''}`,
+                    style: {
+                        fillColor: this.getStatusColor(deliverable.status),
+                        textAlign: 'left'
+                    },
+                    x: Math.random() * 1000,
+                    y: Math.random() * 1000
+                });
+            }
+
+            // Update deliverable with Miro item ID
+            if (this.supabase && stickyNote) {
+                const { error } = await this.supabase
+                    .from('deliverables')
+                    .update({ 
+                        miro_item_ids: [stickyNote.id],
+                        miro_position: {
+                            x: stickyNote.x,
+                            y: stickyNote.y
+                        }
+                    })
+                    .eq('id', deliverable.id);
+
+                if (!error) {
+                    // Update local data
+                    deliverable.miro_item_ids = [stickyNote.id];
+                    deliverable.miro_position = { x: stickyNote.x, y: stickyNote.y };
+                }
+            }
+
+            return stickyNote;
+
+        } catch (error) {
+            console.error('Failed to create sticky note for deliverable:', error);
+        }
+    }
+
+    getStatusColor(status) {
+        const colors = {
+            'in_progress': '#fff3cd',
+            'complete': '#d4edda',
+            'revision_needed': '#f8d7da',
+            'blocked': '#e2e3e5'
+        };
+        return colors[status] || '#ffffff';
     }
 
     updateSyncStatus(status) {

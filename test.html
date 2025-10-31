@@ -118,6 +118,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js"></script>
     <script src="project-integration.js"></script>
+    <script src="ceo-dashboard.js"></script>
 
     <script>
         // Test functions
@@ -261,6 +262,15 @@
                         result += `<strong>Board ID:</strong> ${project.miroBoardId}`;
                     } else {
                         result += '⚠️ No project found for test board ID';
+                    }
+                    
+                    // Test CEO Dashboard
+                    if (window.CEODashboard) {
+                        result += '<br><br>✅ CEO Dashboard loaded!<br>';
+                        const ceoDashboard = new CEODashboard();
+                        result += '✅ CEO Dashboard initialized successfully';
+                    } else {
+                        result += '<br><br>❌ CEO Dashboard not loaded';
                     }
                     
                     showResult('integration-result', result, 'success');
