@@ -11,9 +11,7 @@ class AppConfig {
             
             // Miro Configuration
             miro: {
-                appId: this.getEnvVar('MIRO_APP_ID', '3458764598765432109'),
-                accessToken: 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_BH1OjqHpVAomwhAdCt14quaaHGsmelhore',
-                region: 'eu01',
+                appId: this.getEnvVar('MIRO_APP_ID', 'YOUR_MIRO_APP_ID'),
                 clientId: this.getEnvVar('MIRO_CLIENT_ID', ''),
                 clientSecret: this.getEnvVar('MIRO_CLIENT_SECRET', '')
             },

@@ -253,32 +253,50 @@ class CEODashboard {
             const reportData = {
                 timestamp: new Date().toISOString(),
                 boardId: this.boardId,
-                summary: {
-                    totalDeliverables: this.dashboardData.totalDeliverables,
-                    completedDeliverables: this.dashboardData.completedDeliverables,
-                    completionRate: this.dashboardData.totalDeliverables > 0 
-                        ? Math.round((this.dashboardData.completedDeliverables / this.dashboardData.totalDeliverables) * 100) 
-                        : 0,
-                    overdueDeliverables: this.dashboardData.overdueDeliverables,
-                    teamSize: this.dashboardData.teamPerformance.length,
-                    averageEfficiency: this.calculateAverageEfficiency()
-                },
-                teamPerformance: this.dashboardData.teamPerformance,
-                recentActivity: this.dashboardData.recentActivity
+                total: this.dashboardData.totalDeliverables,
+                completed: this.dashboardData.completedDeliverables,
+                inProgress: this.dashboardData.inProgressDeliverables,
+                overdue: this.dashboardData.overdueDeliverables,
+                teamMembers: this.dashboardData.teamPerformance,
+                overloadedMembers: this.dashboardData.teamPerformance.filter(m => m.isOverloaded).length,
+                teamEfficiency: this.calculateAverageEfficiency(),
+                workloadDistribution: this.getWorkloadDistribution(),
+                recommendations: this.generateRecommendations(),
+                nextSteps: this.generateNextSteps()
             };
 
-            // Create a report sticky note on the Miro board
-            await this.createReportStickyNote(reportData);
-
-            // Show success message
-            if (typeof miro !== 'undefined') {
+            // Use Enhanced Miro SDK if available
+            if (typeof miro !== 'undefined' && window.EnhancedMiroSDK && window.EnhancedMiroSDK.isInitialized) {
+                const report = await window.EnhancedMiroSDK.generateExecutiveReport(reportData);
+                
+                if (report) {
+                    // Track analytics
+                    await window.EnhancedMiroSDK.trackUserActivity('advanced_report_generated', {
+                        reportType: 'executive',
+                        completionRate: Math.round((reportData.completed / reportData.total) * 100),
+                        teamSize: reportData.teamMembers.length,
+                        overloadedMembers: reportData.overloadedMembers
+                    });
+                    
+                    miro.board.notifications.showInfo('📊 Advanced CEO Report with charts generated!');
+                } else {
+                    throw new Error('Enhanced SDK report failed');
+                }
+            } else if (typeof miro !== 'undefined') {
+                // Fallback to basic report
+                await this.createReportStickyNote(reportData);
                 miro.board.notifications.showInfo('📋 CEO Report generated and added to board!');
+            } else {
+                // Show report in browser
+                this.showReportModal(reportData);
             }
 
         } catch (error) {
             console.error('Failed to generate report:', error);
             if (typeof miro !== 'undefined') {
                 miro.board.notifications.showError('Failed to generate report');
+            } else {
+                alert('Failed to generate report: ' + error.message);
             }
         }
     }
@@ -436,3 +454,75 @@ ${this.generateRecommendations()}`;
 
 // Export for global use
 window.CEODashboard = CEODashboard;
+    g
+etWorkloadDistribution() {
+        const total = this.dashboardData.teamPerformance.reduce((sum, member) => sum + member.workloadCount, 0);
+        const avg = total / this.dashboardData.teamPerformance.length;
+        
+        if (avg < 3) return 'Light';
+        if (avg < 5) return 'Balanced';
+        if (avg < 7) return 'Heavy';
+        return 'Critical';
+    }
+
+    generateNextSteps() {
+        const steps = [];
+        
+        if (this.dashboardData.overdueDeliverables > 0) {
+            steps.push('• Address overdue deliverables immediately');
+        }
+        
+        const overloadedMembers = this.dashboardData.teamPerformance.filter(m => m.isOverloaded);
+        if (overloadedMembers.length > 0) {
+            steps.push(`• Reassign tasks from ${overloadedMembers.map(m => m.name).join(', ')}`);
+        }
+        
+        steps.push('• Schedule weekly progress review');
+        steps.push('• Update stakeholders on project status');
+        
+        return steps.join('\n');
+    }
+
+    showReportModal(reportData) {
+        const modal = document.createElement('div');
+        modal.className = 'report-modal';
+        modal.innerHTML = `
+            <div class="report-modal-content">
+                <div class="report-header">
+                    <h2>📊 Executive Report</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="report-body">
+                    <div class="report-section">
+                        <h3>📈 Project Summary</h3>
+                        <p>Total Deliverables: ${reportData.total}</p>
+                        <p>Completed: ${reportData.completed} (${Math.round((reportData.completed/reportData.total)*100)}%)</p>
+                        <p>In Progress: ${reportData.inProgress}</p>
+                        <p>Overdue: ${reportData.overdue}</p>
+                    </div>
+                    <div class="report-section">
+                        <h3>👥 Team Performance</h3>
+                        <p>Team Size: ${reportData.teamMembers.length}</p>
+                        <p>Average Efficiency: ${reportData.teamEfficiency}%</p>
+                        <p>Overloaded Members: ${reportData.overloadedMembers}</p>
+                    </div>
+                    <div class="report-section">
+                        <h3>🎯 Recommendations</h3>
+                        <pre>${reportData.recommendations}</pre>
+                    </div>
+                </div>
+                <div class="report-footer">
+                    <button class="export-btn">📤 Export JSON</button>
+                    <button class="print-btn">🖨️ Print</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Event listeners
+        modal.querySelector('.close-modal').onclick = () => modal.remove();
+        modal.querySelector('.export-btn').onclick = () => this.exportData(reportData);
+        modal.querySelector('.print-btn').onclick = () => window.print();
+        modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    }

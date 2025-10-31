@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add/Edit Deliverable</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://miro.com/app/static/sdk/v2/miro.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="project-integration.js"></script>
+</head>
+<body>
+    <div id="modal-app">
+        <header class="modal-header">
+            <h2 id="modal-title">Add New Deliverable</h2>
+        </header>
+
+        <form id="deliverable-form" class="modal-form">
+            <div class="form-group">
+                <label for="title">Title *</label>
+                <input type="text" id="title" name="title" required placeholder="Enter deliverable title">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="3" placeholder="Describe the deliverable"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" name="status">
+                        <option value="in_progress">🔄 In Progress</option>
+                        <option value="complete">✅ Complete</option>
+                        <option value="revision_needed">🔄 Needs Revision</option>
+                        <option value="blocked">🚫 Blocked</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="priority">Priority</label>
+                    <select id="priority" name="priority">
+                        <option value="low">🟢 Low</option>
+                        <option value="medium" selected>🟡 Medium</option>
+                        <option value="high">🔴 High</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="owner">Owner</label>
+                    <input type="text" id="owner" name="owner" placeholder="Assign to team member">
+                </div>
+
+                <div class="form-group">
+                    <label for="due-date">Due Date</label>
+                    <input type="date" id="due-date" name="dueDate">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="tags">Tags</label>
+                <input type="text" id="tags" name="tags" placeholder="design, frontend, review (comma separated)">
+            </div>
+
+            <!-- File Upload Section -->
+            <div class="form-group">
+                <label for="file-upload">Attach Files</label>
+                <input type="file" id="file-upload" name="files" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg">
+                <div id="file-list" class="file-list"></div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" id="cancel-btn" class="btn-secondary">Cancel</button>
+                <button type="submit" id="save-btn" class="btn-primary">Save Deliverable</button>
+            </div>
+        </form>
+
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p>Saving deliverable...</p>
+        </div>
+    </div>
+
+    <script src="modal.js"></script>
+</body>
+</html>
