@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miro App - Test Page</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section { 
+            background: white; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status { 
+            padding: 10px; 
+            border-radius: 4px; 
+            margin: 10px 0; 
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { 
+            background: #4262ff; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 5px;
+        }
+        button:hover { background: #3451e6; }
+        pre { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            border-radius: 4px; 
+            overflow-x: auto;
+            border: 1px solid #e9ecef;
+        }
+        .loading { 
+            display: inline-block; 
+            width: 20px; 
+            height: 20px; 
+            border: 3px solid #f3f3f3; 
+            border-top: 3px solid #4262ff; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Miro Deliverables App - Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>📡 Server Status</h2>
+        <div id="server-status" class="status info">
+            ✅ Server running on http://localhost:8000
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>⚙️ Configuration Test</h2>
+        <button onclick="testConfig()">Test Config</button>
+        <div id="config-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🗄️ Supabase Connection Test</h2>
+        <button onclick="testSupabase()">Test Supabase</button>
+        <div id="supabase-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Data Test</h2>
+        <button onclick="testData()">Load Test Data</button>
+        <div id="data-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 Miro SDK Test</h2>
+        <div class="status info">
+            ℹ️ Miro SDK only works when loaded inside Miro. 
+            This test will show if the SDK is available.
+        </div>
+        <button onclick="testMiroSDK()">Test Miro SDK</button>
+        <div id="miro-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 Integration Test</h2>
+        <button onclick="testIntegration()">Test Project Integration</button>
+        <div id="integration-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 App Preview</h2>
+        <p>Preview of the actual Miro App interface:</p>
+        <iframe 
+            src="index.html" 
+            width="350" 
+            height="600" 
+            style="border: 1px solid #ccc; border-radius: 8px;">
+        </iframe>
+    </div>
+
+    <!-- Load dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="project-integration.js"></script>
+
+    <script>
+        // Test functions
+        function showResult(elementId, content, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${content}</div>`;
+        }
+
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status info"><span class="loading"></span> Testing...</div>`;
+        }
+
+        function testConfig() {
+            showLoading('config-result');
+            
+            setTimeout(() => {
+                try {
+                    const config = window.AppConfig;
+                    if (!config) {
+                        showResult('config-result', '❌ AppConfig not found', 'error');
+                        return;
+                    }
+
+                    const supabaseUrl = config.get('supabase.url');
+                    const supabaseKey = config.get('supabase.anonKey');
+                    
+                    let result = '✅ Configuration loaded successfully!<br>';
+                    result += `<strong>Supabase URL:</strong> ${supabaseUrl}<br>`;
+                    result += `<strong>Anon Key:</strong> ${supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'Not set'}<br>`;
+                    result += `<strong>Environment:</strong> ${config.get('app.environment')}`;
+                    
+                    showResult('config-result', result, 'success');
+                } catch (error) {
+                    showResult('config-result', `❌ Configuration error: ${error.message}`, 'error');
+                }
+            }, 500);
+        }
+
+        function testSupabase() {
+            showLoading('supabase-result');
+            
+            setTimeout(async () => {
+                try {
+                    const config = window.AppConfig;
+                    const supabase = config.getSupabaseClient();
+                    
+                    if (!supabase) {
+                        showResult('supabase-result', '❌ Supabase client not created', 'error');
+                        return;
+                    }
+
+                    // Test connection with a simple query
+                    const { data, error } = await supabase
+                        .from('deliverables')
+                        .select('count')
+                        .limit(1);
+
+                    if (error) {
+                        showResult('supabase-result', `❌ Supabase connection error: ${error.message}`, 'error');
+                        return;
+                    }
+
+                    showResult('supabase-result', '✅ Supabase connection successful!', 'success');
+                } catch (error) {
+                    showResult('supabase-result', `❌ Supabase test error: ${error.message}`, 'error');
+                }
+            }, 500);
+        }
+
+        function testData() {
+            showLoading('data-result');
+            
+            setTimeout(async () => {
+                try {
+                    const config = window.AppConfig;
+                    const supabase = config.getSupabaseClient();
+                    
+                    // Load test deliverables
+                    const { data: deliverables, error } = await supabase
+                        .from('deliverables')
+                        .select('*')
+                        .eq('board_id', 'test-board-123');
+
+                    if (error) {
+                        showResult('data-result', `❌ Data loading error: ${error.message}`, 'error');
+                        return;
+                    }
+
+                    let result = `✅ Loaded ${deliverables.length} test deliverables:<br><br>`;
+                    deliverables.forEach((item, index) => {
+                        result += `<strong>${index + 1}. ${item.title}</strong><br>`;
+                        result += `Status: ${item.status} | Owner: ${item.owner_name || 'Unassigned'}<br><br>`;
+                    });
+
+                    showResult('data-result', result, 'success');
+                } catch (error) {
+                    showResult('data-result', `❌ Data test error: ${error.message}`, 'error');
+                }
+            }, 500);
+        }
+
+        function testMiroSDK() {
+            showLoading('miro-result');
+            
+            setTimeout(() => {
+                try {
+                    if (typeof miro !== 'undefined') {
+                        showResult('miro-result', '✅ Miro SDK loaded successfully!<br>ℹ️ Full functionality available only inside Miro boards.', 'success');
+                    } else {
+                        showResult('miro-result', '⚠️ Miro SDK not available<br>This is normal when testing outside of Miro.', 'info');
+                    }
+                } catch (error) {
+                    showResult('miro-result', `❌ Miro SDK test error: ${error.message}`, 'error');
+                }
+            }, 500);
+        }
+
+        function testIntegration() {
+            showLoading('integration-result');
+            
+            setTimeout(async () => {
+                try {
+                    const config = window.AppConfig;
+                    const supabase = config.getSupabaseClient();
+                    
+                    if (!window.ProjectIntegrationService) {
+                        showResult('integration-result', '❌ ProjectIntegrationService not loaded', 'error');
+                        return;
+                    }
+
+                    const integration = new ProjectIntegrationService(supabase);
+                    
+                    // Test finding project
+                    const project = await integration.findProjectByBoardId('test-board-123');
+                    
+                    let result = '✅ Project Integration Service loaded!<br>';
+                    if (project) {
+                        result += `<strong>Found Project:</strong> ${project.name}<br>`;
+                        result += `<strong>Status:</strong> ${project.status}<br>`;
+                        result += `<strong>Board ID:</strong> ${project.miroBoardId}`;
+                    } else {
+                        result += '⚠️ No project found for test board ID';
+                    }
+                    
+                    showResult('integration-result', result, 'success');
+                } catch (error) {
+                    showResult('integration-result', `❌ Integration test error: ${error.message}`, 'error');
+                }
+            }, 500);
+        }
+
+        // Auto-run basic tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testConfig();
+                setTimeout(() => testSupabase(), 1000);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Deliverables Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://miro.com/app/static/sdk/v2/miro.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js"></script>
+    <script src="project-integration.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <h2>📋 Deliverables</h2>
+            <button id="add-deliverable" class="btn-primary">+ Add</button>
+        </header>
+
+        <div class="dashboard-content">
+            <!-- Workload Alert -->
+            <div id="workload-alert" class="alert alert-warning" style="display: none;">
+                <span id="alert-message"></span>
+            </div>
+
+            <!-- Deliverables List -->
+            <div id="deliverables-list" class="deliverables-container">
+                <div class="loading">Loading deliverables...</div>
+            </div>
+
+            <!-- Collaborators Section -->
+            <div class="collaborators-section">
+                <h3>👥 Team Workload</h3>
+                <div id="collaborators-list" class="collaborators-container">
+                    <!-- Collaborators will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="sync-status">
+                <span id="sync-indicator" class="sync-indicator">●</span>
+                <span id="sync-text">Synced</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

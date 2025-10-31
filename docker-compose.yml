@@ -1,0 +1,47 @@
+# Miro Deliverables App - Docker Compose for Development
+version: '3.8'
+
+services:
+  miro-app:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      # Mount source files for development
+      - ./manifest.json:/usr/share/nginx/html/manifest.json:ro
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./modal.html:/usr/share/nginx/html/modal.html:ro
+      - ./app.js:/usr/share/nginx/html/app.js:ro
+      - ./modal.js:/usr/share/nginx/html/modal.js:ro
+      - ./styles.css:/usr/share/nginx/html/styles.css:ro
+      - ./config.js:/usr/share/nginx/html/config.js:ro
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Local development server with live reload
+  dev-server:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    command: >
+      sh -c "
+        npm install -g live-server &&
+        live-server --port=3000 --host=0.0.0.0 --no-browser --ignore=node_modules
+      "
+    profiles:
+      - dev
+
+networks:
+  default:
+    name: miro-app-network

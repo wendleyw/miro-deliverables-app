@@ -1,0 +1,21 @@
+{
+  "name": "Project Deliverables Dashboard",
+  "appId": "project-deliverables-dashboard",
+  "sdkVersion": "2.0",
+  "permissions": [
+    "boards:read",
+    "boards:write"
+  ],
+  "startApp": {
+    "url": "index.html",
+    "height": 600,
+    "width": 350
+  },
+  "scopes": [
+    "boards:read",
+    "boards:write"
+  ],
+  "redirectUris": [
+    "https://your-domain.com/auth/callback"
+  ]
+}
