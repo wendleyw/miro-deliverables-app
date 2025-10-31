@@ -2,7 +2,7 @@
 class EnhancedMiroSDK {
     constructor() {
         this.config = window.AppConfig;
-        this.accessToken = this.config.get('miro.accessToken') || 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_g6COHpVOi573okYWzKGcOj3GeSI';
+        this.accessToken = this.config.get('miro.accessToken') || 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_5hKYp-osgPnAjsiBKbQfnE9Xn84';
         this.appId = this.config.get('miro.appId');
         this.region = this.config.get('miro.region') || 'eu01';
         this.boardId = null;
@@ -15,10 +15,27 @@ class EnhancedMiroSDK {
         try {
             // Check if we're in Miro environment
             if (typeof miro !== 'undefined') {
-                await miro.board.ui.on('icon:click', this.handleIconClick.bind(this));
-                this.boardId = await miro.board.getInfo().then(info => info.id);
+                // Try to get board info first
+                try {
+                    const boardInfo = await miro.board.getInfo();
+                    this.boardId = boardInfo.id;
+                    console.log('✅ Enhanced Miro SDK initialized with board:', this.boardId);
+                } catch (boardError) {
+                    console.warn('⚠️ Could not get board info:', boardError.message);
+                    this.boardId = 'unknown';
+                }
+                
+                // Try to set up icon click handler
+                try {
+                    // Note: icon:click might not be available in all contexts
+                    if (miro.board.ui && miro.board.ui.on) {
+                        await miro.board.ui.on('icon:click', this.handleIconClick.bind(this));
+                    }
+                } catch (uiError) {
+                    console.warn('⚠️ Could not set up UI handlers:', uiError.message);
+                }
+                
                 this.isInitialized = true;
-                console.log('✅ Enhanced Miro SDK initialized with board:', this.boardId);
             } else {
                 console.warn('⚠️ Miro SDK not available - running in standalone mode');
             }

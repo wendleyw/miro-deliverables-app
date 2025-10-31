@@ -594,10 +594,12 @@ class DeliverablesDashboard {
 }
 
 // Initialize the app when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    const dashboard = new DeliverablesDashboard();
-    dashboard.init();
-});
+let dashboard = null;
 
-// Make dashboard available globally for debugging
-window.dashboard = dashboard;
+document.addEventListener('DOMContentLoaded', () => {
+    dashboard = new DeliverablesDashboard();
+    dashboard.init();
+    
+    // Make dashboard available globally for debugging
+    window.dashboard = dashboard;
+});

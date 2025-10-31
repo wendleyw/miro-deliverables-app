@@ -453,10 +453,7 @@ ${this.generateRecommendations()}`;
     }
 }
 
-// Export for global use
-window.CEODashboard = CEODashboard;
-    g
-etWorkloadDistribution() {
+    getWorkloadDistribution() {
         const total = this.dashboardData.teamPerformance.reduce((sum, member) => sum + member.workloadCount, 0);
         const avg = total / this.dashboardData.teamPerformance.length;
         
@@ -526,4 +523,8 @@ etWorkloadDistribution() {
         modal.querySelector('.export-btn').onclick = () => this.exportData(reportData);
         modal.querySelector('.print-btn').onclick = () => window.print();
         modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
-    }
+    }}
+
+
+// Export for global use
+window.CEODashboard = CEODashboard;

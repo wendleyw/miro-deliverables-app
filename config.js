@@ -12,7 +12,7 @@ class AppConfig {
             // Miro Configuration
             miro: {
                 appId: this.getEnvVar('MIRO_APP_ID', '3458764598765432109'),
-                accessToken: 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_g6COHpVOi573okYWzKGcOj3GeSI',
+                accessToken: 'eyJtaXJvLm9yaWdpbiI6ImV1MDEifQ_5hKYp-osgPnAjsiBKbQfnE9Xn84',
                 region: 'eu01',
                 clientId: this.getEnvVar('MIRO_CLIENT_ID', ''),
                 clientSecret: this.getEnvVar('MIRO_CLIENT_SECRET', '')
@@ -142,10 +142,24 @@ class AppConfig {
         }
         
         try {
+            // Check if we already have a client instance
+            if (this._supabaseClient) {
+                return this._supabaseClient;
+            }
+            
             const client = createClient(
                 this.get('supabase.url'),
-                this.get('supabase.anonKey')
+                this.get('supabase.anonKey'),
+                {
+                    auth: {
+                        persistSession: false, // Avoid multiple instances warning
+                        autoRefreshToken: false
+                    }
+                }
             );
+            
+            // Cache the client
+            this._supabaseClient = client;
             console.log('✅ Supabase client created successfully');
             return client;
         } catch (error) {
